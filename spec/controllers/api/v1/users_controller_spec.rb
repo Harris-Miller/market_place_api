@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe Api::V1::UsersController do
   before(:each) { request.headers['Accept'] = "application/vnd.marketplace.v1" }
@@ -10,7 +10,7 @@ describe Api::V1::UsersController do
     end
 
     it "returns the information about the reporter on a hash" do
-      user_response = JSON.parse(resposne.body, symbolize_names: true)
+      user_response = JSON.parse(response.body, symbolize_names: true)
       expect(user_response[:email]).to eql @user.email
     end
 
@@ -21,7 +21,7 @@ describe Api::V1::UsersController do
 
     context "when is successfully created" do
       before(:each) do
-        @user_attributes = FactoryGirl.attribute_for :user
+        @user_attributes = FactoryGirl.attributes_for :user
         post :create, { user: @user_attributes }, format: :json
       end
 
@@ -50,7 +50,7 @@ describe Api::V1::UsersController do
         expect(user_response[:errors][:email]).to include "can't be blank"
       end
 
-      it { should response_with 422 }
+      it { should respond_with 422 }
     end
   end
 end
