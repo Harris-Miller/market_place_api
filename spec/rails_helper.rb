@@ -61,6 +61,12 @@ RSpec.configure do |config|
 
   # add custon JsonHelpers to controller
   config.include Request::JsonHelpers, :type => :controller
+  config.include Request::HeadersHelpers, :type => :controller
+
+  # add global before each to controllers
+  config.before(:each, type: :controller) do
+    include_default_accept_headers
+  end
 end
 
 Shoulda::Matchers.configure do |config|
