@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Api::V1::UsersController do
+describe Api::V1::UsersController, type: :controller do
 
   describe "GET #show" do
     before(:each) do
