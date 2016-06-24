@@ -8,7 +8,7 @@ RSpec.describe Api::V1::SessionsController, type: :controller do
     context "when the credentials are correct" do
       before(:each) do
         credentials = { email: @user.email, password: "12345678" }
-        post :create, { session: credentials }
+        post :create, { session: credentials }, format: :json
       end
 
       it "returns the user record corresponding to the given credentials" do
@@ -22,7 +22,7 @@ RSpec.describe Api::V1::SessionsController, type: :controller do
     context "when the credentials are incorrect" do
       before(:each) do
         credentials = { email: @user.email, password: "invalidpassword" }
-        post :create, { session: credentials }
+        post :create, { session: credentials }, format: :json
       end
 
       it "returns a json with an error" do
@@ -37,7 +37,7 @@ RSpec.describe Api::V1::SessionsController, type: :controller do
     before(:each) do
       @user = FactoryGirl.create :user
       sign_in @user
-      delete :destroy, id: @user.auth_token
+      delete :destroy, id: @user.auth_token, format: :json
     end
 
     it { should respond_with 204 }
