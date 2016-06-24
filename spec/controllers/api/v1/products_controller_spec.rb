@@ -7,9 +7,10 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
       get :index, format: :json
     end
 
+    it("returns data") { expect(json_response).to have_key(:data) }
+
     it "returns 4 records from the database" do
-      products_response = json_response
-      expect(products_response.size).to eql 4
+      expect(json_response[:data].size).to eql 4
     end
 
     it { should respond_with 200 }
@@ -21,9 +22,12 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
       get :show, id: @product.id, format: :json
     end
 
+    it("returns data") { expect(json_response).to have_key(:data) }
+
     it "returns the information about a reporter on a hash" do
-      product_response = json_response
-      expect(product_response[:title]).to eql @product.title
+      product_response = json_response[:data]
+      expect(product_response).to have_key(:attributes)
+      expect(product_response[:attributes][:title]).to eql @product.title
     end
 
     it { should respond_with 200 }
@@ -38,9 +42,12 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
         post :create, { user_id: user.id, product: @product_attributes }, format: :json
       end
 
+      it("returns data") { expect(json_response).to have_key(:data) }
+
       it "renders the json representation for the product record just created" do
-        product_response = json_response
-        expect(product_response[:title]).to eql @product_attributes[:title]
+        product_response = json_response[:data]
+        expect(product_response).to have_key(:attributes)
+        expect(product_response[:attributes][:title]).to eql @product_attributes[:title]
       end
 
       it { should respond_with 201 }
@@ -54,14 +61,12 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
         post :create, { user_id: user.id, product: @invalid_product_attributes }, format: :json
       end
 
-      it "renders an errors json" do
-        product_response = json_response
-        expect(product_response).to have_key(:errors)
-      end
+      it("renders an errors json") { expect(json_response).to have_key(:errors) }
 
       it "renders the json errors on why the product could not be created" do
-        product_response = json_response
-        expect(product_response[:errors][:price]).to include "is not a number"
+        first_error = json_response[:errors][0]
+        expect(first_error[:title]).to eql "Invalid attribute 'price'"
+        expect(first_error[:detail]).to include "is not a number"
       end
 
       it { should respond_with 422 }
@@ -78,9 +83,12 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
     context "when is successfully updated" do
       before(:each) { patch :update, { user_id: @user.id, id: @product.id, product: { title: "An expensive TV" } } }
 
+      it("returns data") { expect(json_response).to have_key(:data) }
+
       it "renders the json representation for the updated user" do
-        product_response = json_response
-        expect(product_response[:title]).to eql "An expensive TV"
+        product_response = json_response[:data]
+        expect(product_response).to have_key(:attributes)
+        expect(product_response[:attributes][:title]).to eql "An expensive TV"
       end
 
       it { should respond_with 200 }
@@ -89,14 +97,12 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
     context "when is not updated" do
       before(:each) { patch :update, { user_id: @user.id, id: @product.id, product: { price: "two hundred" } } }
 
-      it "renders and errors json" do
-        product_response = json_response
-        expect(product_response).to have_key(:errors)
-      end
+      it("renders an errors json") { expect(json_response).to have_key(:errors) }
 
       it "renders the json errors on why the user could not be created" do
-        product_response = json_response
-        expect(product_response[:errors][:price]).to include "is not a number"
+        first_error = json_response[:errors][0]
+        expect(first_error[:title]).to eql "Invalid attribute 'price'"
+        expect(first_error[:detail]).to include "is not a number"
       end
 
       it { should respond_with 422 }

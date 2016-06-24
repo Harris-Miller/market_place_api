@@ -8,9 +8,12 @@ describe Api::V1::UsersController, type: :controller do
       get :show, id: @user.id, format: :json
     end
 
+    it("returns data") { expect(json_response).to have_key(:data) }
+
     it "returns the information about the reporter on a hash" do
-      user_response = json_response
-      expect(user_response[:email]).to eql @user.email
+      user_response = json_response[:data]
+      expect(user_response).to have_key(:attributes)
+      expect(user_response[:attributes][:email]).to eql @user.email
     end
 
     it { should respond_with 200 }
@@ -24,9 +27,12 @@ describe Api::V1::UsersController, type: :controller do
         post :create, { user: @user_attributes }, format: :json
       end
 
+      it("returns data") { expect(json_response).to have_key(:data) }
+
       it "renders the json representation for the user record just created" do
-        user_response = json_response
-        expect(user_response[:email]).to eql @user_attributes[:email]
+        user_response = json_response[:data]
+        expect(user_response).to have_key(:attributes)
+        expect(user_response[:attributes][:email]).to eql @user_attributes[:email]
       end
 
       it { should respond_with 201 }
@@ -39,14 +45,12 @@ describe Api::V1::UsersController, type: :controller do
         post :create, { user: @invalid_user_attributes }, format: :json
       end
 
-      it "renders an errors json" do
-        user_response = json_response
-        expect(user_response).to have_key(:errors)
-      end
+      it("renders an errors json") { expect(json_response).to have_key(:errors) }
 
       it "renders the json errors on why the user could not be created" do
-        user_response = json_response
-        expect(user_response[:errors][:email]).to include "can't be blank"
+        first_error = json_response[:errors][0]
+        expect(first_error[:title]).to eql "Invalid attribute 'email'"
+        expect(first_error[:detail]).to include "can't be blank"
       end
 
       it { should respond_with 422 }
@@ -64,9 +68,12 @@ describe Api::V1::UsersController, type: :controller do
         patch :update, { id: @user.id, user: { email: "newmail@example.com" } }, format: :json
       end
 
+      it("returns data") { expect(json_response).to have_key(:data) }
+
       it "renders the json represntation for the updated user" do
-        user_response = json_response
-        expect(user_response[:email]).to eql "newmail@example.com"
+        user_response = json_response[:data]
+        expect(user_response).to have_key(:attributes)
+        expect(user_response[:attributes][:email]).to eql "newmail@example.com"
       end
 
       it { should respond_with 200 }
@@ -77,14 +84,12 @@ describe Api::V1::UsersController, type: :controller do
         patch :update, { id: @user.id, user: { email: "bademail.com" } }, format: :json
       end
 
-      it "renders an errors json" do
-        user_response = json_response
-        expect(user_response).to have_key(:errors)
-      end
+      it("renders an errors json") { expect(json_response).to have_key(:errors) }
 
       it "renders the json errors on why the user could not be created" do
-        user_response = json_response
-        expect(user_response[:errors][:email]).to include "is invalid"
+        first_error = json_response[:errors][0]
+        expect(first_error[:title]).to eql "Invalid attribute 'email'"
+        expect(first_error[:detail]).to include "is invalid"
       end
 
       it { should respond_with 422 }

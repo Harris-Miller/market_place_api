@@ -31,12 +31,20 @@ RSpec.describe Authenticable do
       @user = FactoryGirl.create :user
       allow(authentication).to receive(:current_user).and_return(nil)
       allow(response).to receive(:response_code).and_return(401)
-      allow(response).to receive(:body).and_return({ "errors" => "Not authenticated" }.to_json)
+      allow(response).to receive(:body).and_return({ errors: [{ title: "Unauthorized", detail: "Not authenticated" }] }.to_json)
       allow(authentication).to receive(:response).and_return(response)
     end
 
     it "render a json error message" do
-      expect(json_response[:errors]).to eql "Not authenticated"
+      auth_response = json_response
+      expect(auth_response).to have_key(:errors)
+      expect(auth_response[:errors]).to be_a(Array)
+    end
+
+    it "renders an error json with status, title, and detail" do
+      err_obj = json_response[:errors][0]
+      expect(err_obj[:title]).to eql "Unauthorized"
+      expect(err_obj[:detail]).to eql "Not authenticated"
     end
 
     it { should respond_with 401 }

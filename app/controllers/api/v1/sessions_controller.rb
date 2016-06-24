@@ -13,7 +13,7 @@ class Api::V1::SessionsController < ApplicationController
 
       render json: user, status: 200, location: [:api, user]
     else
-      render json: { errors: "Invalid email or password" }, status: 422
+      render json: { errors: [{ detail: "Invalid email or password" }] }, status: 422
     end
   end
 

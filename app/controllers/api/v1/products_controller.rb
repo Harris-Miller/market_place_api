@@ -16,7 +16,7 @@ class Api::V1::ProductsController < ApplicationController
     if product.save
       render json: product, status: 201, location: [:api, product]
     else
-      render json: { errors: product.errors }, status: 422
+      render json: build_errors_hash(product.errors), status: 422
     end
   end
 
@@ -26,7 +26,7 @@ class Api::V1::ProductsController < ApplicationController
     if product.update(product_params)
       render json: product, status: 200, location: [:api, product]
     else
-      render json: { errors: product.errors}, status: 422
+      render json: build_errors_hash(product.errors), status: 422
     end
   end
 

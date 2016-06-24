@@ -12,7 +12,7 @@ class Api::V1::UsersController < ApplicationController
     if user.save
       render json: user, status: 201, location: [:api, user]
     else
-      render json: { errors: user.errors }, status: 422
+      render json: build_errors_hash(user.errors), status: 422
     end
   end
 
@@ -22,7 +22,7 @@ class Api::V1::UsersController < ApplicationController
     if user.update(user_params)
       render json: user, status: 200, location: [:api, user]
     else
-      render json: { errors: user.errors }, status: 422
+      render json: build_errors_hash(user.errors), status: 422
     end
   end
 

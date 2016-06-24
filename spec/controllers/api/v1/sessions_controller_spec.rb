@@ -13,7 +13,10 @@ RSpec.describe Api::V1::SessionsController, type: :controller do
 
       it "returns the user record corresponding to the given credentials" do
         @user.reload
-        expect(json_response[:auth_token]).to eql @user.auth_token
+        user_response = json_response
+        expect(user_response).to have_key(:data)
+        expect(user_response[:data]).to have_key(:attributes)
+        expect(user_response[:data][:attributes][:"auth-token"]).to eql @user.auth_token
       end
 
       it { should respond_with 200 }
@@ -25,8 +28,11 @@ RSpec.describe Api::V1::SessionsController, type: :controller do
         post :create, { session: credentials }, format: :json
       end
 
-      it "returns a json with an error" do
-        expect(json_response[:errors]).to eql "Invalid email or password"
+      it("renders an errors json") { expect(json_response).to have_key(:errors) }
+
+      it "returns a json with an error explaining why" do
+        first_error = json_response[:errors][0]
+        expect(first_error[:detail]).to include "Invalid email or password"
       end
 
       it { should respond_with 422 }
