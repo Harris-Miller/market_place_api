@@ -13,6 +13,31 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
       expect(json_response[:data].size).to eql 4
     end
 
+    it "returns the user object into each product relationship" do
+      products_response = json_response[:data]
+      products_response.each do |pr|
+        expect(pr).to have_key(:relationships)
+        expect(pr[:relationships]).to have_key(:user)
+      end
+    end
+
+    context "when product_ids parameter is sent" do
+      before(:each) do
+        @user = FactoryGirl.create :user
+        3.times { FactoryGirl.create :product, user: @user}
+        get :index, product_ids: @user.product_ids, format: :json
+      end
+
+      it "returns just the products that belong to the user" do
+        products_response = json_response[:data]
+        products_response.each do |pr|
+          expect(pr).to have_key(:relationships)
+          expect(pr[:relationships]).to have_key(:user)
+          expect(pr[:relationships][:user][:data][:id]).to eql @user.id.to_s
+        end
+      end
+    end
+
     it { should respond_with 200 }
   end
 
@@ -28,6 +53,12 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
       product_response = json_response[:data]
       expect(product_response).to have_key(:attributes)
       expect(product_response[:attributes][:title]).to eql @product.title
+    end
+
+    it "has the user as an embedded object" do
+      product_response = json_response[:data]
+      expect(product_response).to have_key(:relationships)
+      expect(product_response[:relationships]).to have_key(:user)
     end
 
     it { should respond_with 200 }
